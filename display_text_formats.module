@@ -46,7 +46,7 @@ function display_text_formats_field_formatter_settings_form($field, $instance, $
       '#type' => 'checkbox',
       '#default_value' => $settings['intelligent_trim'],
     );
-    
+
     // Build the options array for text formats.
     $formats = filter_formats();
     $options = array();
@@ -95,15 +95,18 @@ function display_text_formats_field_formatter_view($entity_type, $entity, $field
     foreach ($items as $delta => $item) {
       // Do what _text_sanitize() does, knowing it has a text format.
       $output = check_markup($item['value'], $display['settings']['text_format'], $langcode);
-      
+
+      if (($line_break = strpos($item['safe_value'], '<!--break-->')) !== FALSE) {
+        $output = text_summary($output, $display['settings']['text_format'], $line_break);
+      }
       // Use the text module's trimming function natively.
-      if ($display['settings']['intelligent_trim']) {
+      elseif ($display['settings']['intelligent_trim']) {
         $output = text_summary($output, $display['settings']['text_format'], $display['settings']['trim_length']);
       }
       else {
         $output = drupal_substr($output, 0, $display['settings']['trim_length']);
       }
-      
+
       $element[$delta] = array('#markup' => $output);
     }
   }
